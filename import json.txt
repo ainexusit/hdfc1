@@ -1,0 +1,34 @@
+import json
+import boto3
+
+client1 = boto3.client('dynamodb')
+client = boto3.client('s3')
+
+bucketname = 's3-input-demo-online6'
+filename = 'emp.csv'
+
+def lambda_handler(event, context):
+    response = client.get_object(Bucket=bucketname, Key=filename)
+    data = response['Body'].read().decode('utf-8')
+    temp = data.split('\n')
+    temp.pop(0)
+
+    for record in temp:
+        row = record.split(',')
+        response = client1.put_item(
+        Item={
+            'eid': {
+                'N': row[0],
+            },
+            'ename': {
+                'S': row[1],
+            },
+            'esal': {
+                'N': str(int(row[2])),
+            },
+        },
+        
+        TableName='emp',
+    )
+
+    
